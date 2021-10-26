@@ -26,21 +26,32 @@ class RedisStore {
   }
 
   async getItem (key) {
+    if (!this.client.connected) {
+      return null
+    }
     const item = (await this.hgetAsync(this.HASH_KEY, key)) || null
-
     return JSON.parse(item)
   }
 
   async setItem (key, value) {
+    if (!this.client.connected) {
+      return value
+    }
     await this.hsetAsync(this.HASH_KEY, key, JSON.stringify(value))
     return value
   }
 
   async removeItem (key) {
+    if (!this.client.connected) {
+      return
+    }
     await this.hdelAsync(this.HASH_KEY, key)
   }
 
   async clear () {
+    if (!this.client.connected) {
+      return
+    }
     await this.delAsync(this.HASH_KEY)
   }
 
