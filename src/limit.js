@@ -5,8 +5,13 @@ async function limit (config) {
 
   config.debug(`Current store size: ${length}`)
   if (length > config.limit * 2) {
-    config.debug('Clearing cache store')
-    await config.store.clear()
+    config.info('Clearing cache store', length)
+    try {
+      await config.store.clear()
+      config.info('Cleared cache store')
+    } catch (err) {
+      config.info('Could not clear cache store', err)
+    }
     return
   }
 

@@ -5,6 +5,7 @@ import { key, invalidate } from './cache'
 
 const noop = () => {}
 const debug = (...args) => console.log('[axios-cache-adapter]', ...args)
+const info = (...args) => console.log('[axios-cache-adapter]', ...args)
 
 const defaults = {
   // Default settings when solely creating the cache adapter with setupCache.
@@ -26,6 +27,7 @@ const defaults = {
     readOnError: false,
     readHeaders: false,
     debug: false,
+    info: false,
     ignoreCache: false
   },
 
@@ -65,6 +67,11 @@ const makeConfig = function (override = {}) {
   } else {
     config.debug = noop
   }
+  if (config.info !== false) {
+    config.info = typeof config.info === 'function' ? config.info : info
+  } else {
+    config.info = noop
+  }
 
   // Create an in memory store if none was given
   if (!config.store) config.store = new MemoryStore()
@@ -103,6 +110,9 @@ const mergeRequestConfig = function (config, req) {
 
   if (mergedConfig.debug === true) {
     mergedConfig.debug = debug
+  }
+  if (mergedConfig.info === true) {
+    mergedConfig.info = info
   }
 
   // Create a cache key method

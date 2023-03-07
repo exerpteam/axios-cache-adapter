@@ -104,6 +104,11 @@ export interface IAxiosCacheAdapterOptions
 	 */
 	debug?: Function | boolean;
 
+	/**
+	 * {Function|Boolean} Print out info log to console.
+	 */
+	info?: Function | boolean;
+
   excludeFromCache?: boolean;
 }
 
