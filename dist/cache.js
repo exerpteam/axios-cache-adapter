@@ -3533,7 +3533,7 @@ function _write() {
         case 8:
           _context.prev = 8;
           _context.t0 = _context["catch"](2);
-          config.info('Could not store response', _context.t0);
+          config.info('Could not store response ' + _context.t0);
           if (!config.clearOnError) {
             _context.next = 20;
             break;

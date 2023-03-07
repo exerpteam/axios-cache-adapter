@@ -16,7 +16,7 @@ async function write (config, req, res) {
 
     await config.store.setItem(config.uuid, entry)
   } catch (err) {
-    config.info('Could not store response', err)
+    config.info('Could not store response ' + err)
 
     if (config.clearOnError) {
       try {
