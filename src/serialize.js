@@ -4,7 +4,7 @@ function serialize (config, req, res) {
     try {
       res.data = JSON.parse(res.data)
     } catch (err) {
-      config.debug('Could not parse data as JSON', err)
+      config.debug('Could not parse data as JSON: ' + err)
     }
   }
 

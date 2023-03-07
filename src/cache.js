@@ -4,6 +4,10 @@ import md5 from 'md5'
 import serialize from './serialize'
 
 async function write (config, req, res) {
+  if (config.ignoreCache) {
+    // we do not even write to cache if ignoreCache is true
+    return false
+  }
   try {
     const entry = {
       expires: config.expires,
@@ -12,13 +16,13 @@ async function write (config, req, res) {
 
     await config.store.setItem(config.uuid, entry)
   } catch (err) {
-    config.debug('Could not store response', err)
+    config.info('Could not store response ' + err)
 
     if (config.clearOnError) {
       try {
         await config.store.clear()
       } catch (err) {
-        config.debug('Could not clear store', err)
+        config.debug('Could not clear store:' + err)
       }
     }
 
@@ -31,9 +35,17 @@ async function write (config, req, res) {
 async function read (config, req) {
   const { uuid, ignoreCache } = config
 
+  if (ignoreCache) {
+    const error = new Error()
+
+    error.reason = 'cache-miss'
+    error.message = 'Cache not enabled for entry'
+
+    throw error
+  }
   const entry = await config.store.getItem(uuid)
 
-  if (ignoreCache || !entry || !entry.data) {
+  if (!entry || !entry.data) {
     config.debug('cache-miss', req.url)
     const error = new Error()
 
