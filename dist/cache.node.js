@@ -3626,7 +3626,7 @@ function _write() {
         case 17:
           _context.prev = 17;
           _context.t1 = _context["catch"](12);
-          config.debug('Could not clear store', _context.t1);
+          config.debug('Could not clear store:' + _context.t1);
         case 20:
           return _context.abrupt("return", false);
         case 21:
@@ -3927,7 +3927,7 @@ var mergeRequestConfig = function mergeRequestConfig(config, req) {
 
   // Generate request UUID
   mergedConfig.uuid = mergedConfig.key(req);
-  config.debug("Request config for ".concat(req.url), mergedConfig);
+  config.debug("Request config for ".concat(req.url));
   return mergedConfig;
 };
 
@@ -4082,103 +4082,107 @@ function limit(_x) {
 }
 function _limit() {
   _limit = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee(config) {
-    var length, firstItem, cursor, safeguard, _yield$config$store$h, _yield$config$store$h2, nextCursor, keys, i, key, value, expires;
+    var start, length, end, time, firstItem, cursor, safeguard, _yield$config$store$h, _yield$config$store$h2, nextCursor, keys, i, key, value, expires;
     return _regeneratorRuntime().wrap(function _callee$(_context) {
       while (1) switch (_context.prev = _context.next) {
         case 0:
-          _context.next = 2;
+          // compute the time it takes to check the cache size
+          start = Date.now();
+          _context.next = 3;
           return config.store.length();
-        case 2:
+        case 3:
           length = _context.sent;
-          if (!(length < config.limit)) {
-            _context.next = 5;
+          end = Date.now();
+          time = end - start; // if time is more than 1 second, then we should probably purge everything
+          config.debug("Current store size: ".concat(length, " time took to check: ").concat(time, "ms"));
+          if (!(length > config.limit * 2 || time > 1000 && length > config.limit)) {
+            _context.next = 19;
             break;
           }
-          return _context.abrupt("return");
-        case 5:
-          config.debug("Current store size: ".concat(length));
-          if (!(length > config.limit * 2)) {
-            _context.next = 18;
-            break;
-          }
-          config.info('Clearing cache store', length);
-          _context.prev = 8;
-          _context.next = 11;
+          config.info("Clearing store. Size: ".concat(length, " Time took to check: ").concat(time, "ms"));
+          _context.prev = 9;
+          _context.next = 12;
           return config.store.clear();
-        case 11:
+        case 12:
           config.info('Cleared cache store');
-          _context.next = 17;
+          _context.next = 18;
           break;
-        case 14:
-          _context.prev = 14;
-          _context.t0 = _context["catch"](8);
-          config.info('Could not clear cache store', _context.t0);
-        case 17:
-          return _context.abrupt("return");
+        case 15:
+          _context.prev = 15;
+          _context.t0 = _context["catch"](9);
+          config.info('Could not clear cache store: ' + _context.t0);
         case 18:
+          return _context.abrupt("return");
+        case 19:
+          if (!(length < config.limit)) {
+            _context.next = 21;
+            break;
+          }
+          return _context.abrupt("return");
+        case 21:
           // await config.store.iterate((value, key) => {
           //   if (!firstItem) firstItem = { value, key }
           //   if (value.expires < firstItem.value.expires) firstItem = { value, key }
           // })
           cursor = '0';
           safeguard = config.limit * 2;
-        case 20:
+        case 23:
           if (!(safeguard-- > 0)) {
-            _context.next = 43;
+            _context.next = 46;
             break;
           }
-          _context.next = 23;
+          _context.next = 26;
           return config.store.hscan(cursor);
-        case 23:
+        case 26:
           _yield$config$store$h = _context.sent;
           _yield$config$store$h2 = _slicedToArray(_yield$config$store$h, 2);
           nextCursor = _yield$config$store$h2[0];
           keys = _yield$config$store$h2[1];
           i = 0;
-        case 28:
+        case 31:
           if (!(i < keys.length)) {
-            _context.next = 38;
+            _context.next = 41;
             break;
           }
           key = keys[i];
           value = keys[i + 1];
           expires = Number(JSON.parse(value).expires);
           if (!(expires <= Date.now())) {
-            _context.next = 35;
+            _context.next = 38;
             break;
           }
           firstItem = {
             key: key,
             value: value
           };
-          return _context.abrupt("break", 38);
-        case 35:
-          i += 2;
-          _context.next = 28;
-          break;
+          return _context.abrupt("break", 41);
         case 38:
+          i += 2;
+          _context.next = 31;
+          break;
+        case 41:
           if (!(nextCursor === '0' || firstItem)) {
-            _context.next = 40;
+            _context.next = 43;
             break;
           }
-          return _context.abrupt("break", 43);
-        case 40:
-          cursor = nextCursor;
-          _context.next = 20;
-          break;
+          return _context.abrupt("break", 46);
         case 43:
+          cursor = nextCursor;
+          _context.next = 23;
+          break;
+        case 46:
           if (!firstItem) {
-            _context.next = 47;
+            _context.next = 50;
             break;
           }
           config.debug("Removing item: ".concat(firstItem.key));
-          _context.next = 47;
+          _context.next = 50;
           return config.store.removeItem(firstItem.key);
-        case 47:
+        case 50:
         case "end":
           return _context.stop();
       }
-    }, _callee, null, [[8, 14]]);
+    }, _callee, null, [[9, 15]]);
   }));
   return _limit.apply(this, arguments);
 }
@@ -5197,7 +5201,7 @@ function serialize(config, req, res) {
     try {
       res.data = JSON.parse(res.data);
     } catch (err) {
-      config.debug('Could not parse data as JSON', err);
+      config.debug('Could not parse data as JSON: ' + err);
     }
   }
   var request = res.request,
