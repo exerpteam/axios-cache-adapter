@@ -4,7 +4,7 @@ async function limit (config) {
   const length = await config.store.length()
   const end = Date.now()
   const time = end - start
-  // if time is more than 1 second, then we should probably purge everything        
+  // if time is more than 1 second, then we should probably purge everything
 
   config.debug(`Current store size: ${length} time took to check: ${time}ms`)
   if (length > config.limit * 2 || (time > 1000 && length > config.limit)) {

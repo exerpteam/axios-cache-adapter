@@ -22,7 +22,7 @@ async function write (config, req, res) {
       try {
         await config.store.clear()
       } catch (err) {
-        config.debug('Could not clear store', err)
+        config.debug('Could not clear store:' + err)
       }
     }
 
