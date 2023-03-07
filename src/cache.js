@@ -4,6 +4,10 @@ import md5 from 'md5'
 import serialize from './serialize'
 
 async function write (config, req, res) {
+  if (config.ignoreCache) {
+    // we do not even write to cache if ignoreCache is true
+    return false
+  }
   try {
     const entry = {
       expires: config.expires,
@@ -31,9 +35,17 @@ async function write (config, req, res) {
 async function read (config, req) {
   const { uuid, ignoreCache } = config
 
+  if (ignoreCache) {
+    const error = new Error()
+
+    error.reason = 'cache-miss'
+    error.message = 'Cache not enabled for entry'
+
+    throw error
+  }
   const entry = await config.store.getItem(uuid)
 
-  if (ignoreCache || !entry || !entry.data) {
+  if (!entry || !entry.data) {
     config.debug('cache-miss', req.url)
     const error = new Error()
 

@@ -23,6 +23,7 @@ class RedisStore {
     this.delAsync = promisify(client.del).bind(client)
     this.hlenAsync = promisify(client.hlen).bind(client)
     this.hgetallAsync = promisify(client.hgetall).bind(client)
+    this.hscanAsync = promisify(client.hscan).bind(client)
   }
 
   async getItem (key) {
@@ -56,7 +57,17 @@ class RedisStore {
   }
 
   async length () {
+    if (!this.client.connected) {
+      return 0
+    }
     return this.hlenAsync(this.HASH_KEY)
+  }
+
+  async hscan (cursor) {
+    if (!this.client.connected) {
+      return [0, []]
+    }
+    return this.hscanAsync(this.HASH_KEY, cursor, 'MATCH', '*', 'COUNT', 10)
   }
 
   async iterate (fn) {
