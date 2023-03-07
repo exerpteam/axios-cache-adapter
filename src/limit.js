@@ -1,19 +1,24 @@
 async function limit (config) {
+  // compute the time it takes to check the cache size
+  const start = Date.now()
   const length = await config.store.length()
+  const end = Date.now()
+  const time = end - start
+  // if time is more than 1 second, then we should probably purge everything        
 
-  if (length < config.limit) return
-
-  config.debug(`Current store size: ${length}`)
-  if (length > config.limit * 2) {
-    config.info('Clearing cache store', length)
+  config.debug(`Current store size: ${length} time took to check: ${time}ms`)
+  if (length > config.limit * 2 || (time > 1000 && length > config.limit)) {
+    config.info(`Clearing store. Size: ${length} Time took to check: ${time}ms`)
     try {
       await config.store.clear()
       config.info('Cleared cache store')
     } catch (err) {
-      config.info('Could not clear cache store', err)
+      config.info('Could not clear cache store: ' + err)
     }
     return
   }
+
+  if (length < config.limit) return
 
   let firstItem
 
